@@ -74,9 +74,9 @@ function Register() {
     <div className="register-container">
       <div className="register-card">
         <div className="register-header">
+          <img src="/logo.png" alt="EUsuite Logo" className="logo" />
           <h1>EUsuite</h1>
           <p>Account aanmaken</p>
-          <div className="register-icon">👤</div>
         </div>
 
         <form onSubmit={handleSubmit} className="register-form">

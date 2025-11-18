@@ -52,9 +52,9 @@ function Login() {
     <div className="login-container">
       <div className="login-card">
         <div className="login-header">
+          <img src="/logo.png" alt="EUsuite Logo" className="logo" />
           <h1>EUsuite</h1>
           <p>Centraal inloggen voor alle EUsuite apps</p>
-          <div className="login-icon">🔐</div>
         </div>
 
         <form onSubmit={handleSubmit} className="login-form">

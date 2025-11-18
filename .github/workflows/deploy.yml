@@ -37,9 +37,7 @@ jobs:
         with:
           images: ${{ env.DOCKER_IMAGE }}
           tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=sha,prefix={{branch}}-
+            type=sha,prefix=
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push Docker image
@@ -67,7 +65,7 @@ jobs:
 
       - name: Update deployment image
         run: |
-          sed -i 's|image: docker.io/dylan016504/eusuite-login:latest|image: ${{ env.DOCKER_IMAGE }}:latest|g' k8s/deployment.yaml
+          sed -i 's|image: docker.io/dylan016504/eusuite-login:latest|image: ${{ env.DOCKER_IMAGE }}:${{ github.sha }}|g' k8s/deployment.yaml
 
       - name: Create namespace if not exists
         run: |
@@ -78,6 +76,10 @@ jobs:
           kubectl apply -f k8s/deployment.yaml
           kubectl apply -f k8s/service.yaml
 
+      - name: Force rollout restart
+        run: |
+          kubectl rollout restart deployment/eusuite-login -n ${{ env.K8S_NAMESPACE }}
+          
       - name: Wait for rollout
         run: |
           kubectl rollout status deployment/eusuite-login -n ${{ env.K8S_NAMESPACE }} --timeout=300s

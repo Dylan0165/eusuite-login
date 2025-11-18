@@ -19,6 +19,9 @@ spec:
       - name: eusuite-login
         image: docker.io/dylan016504/eusuite-login:latest
         imagePullPolicy: Always
+        env:
+        - name: CACHE_BUST
+          value: "{{ GITHUB_SHA }}"
         ports:
         - containerPort: 80
           protocol: TCP

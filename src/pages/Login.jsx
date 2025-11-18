@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import './Login.css'
 
 const API_URL = 'http://192.168.124.50:30500/api/auth/login'
@@ -7,6 +7,7 @@ const DEFAULT_REDIRECT = 'http://192.168.124.50:30080'
 
 function Login() {
   const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -94,6 +95,21 @@ function Login() {
           <button type="submit" className="login-button" disabled={loading}>
             {loading ? 'Inloggen...' : 'Inloggen'}
           </button>
+
+          <div className="switch-auth">
+            <p>Nog geen account?</p>
+            <button 
+              type="button" 
+              className="switch-button"
+              onClick={() => {
+                const redirect = searchParams.get('redirect')
+                navigate(redirect ? `/register?redirect=${redirect}` : '/register')
+              }}
+              disabled={loading}
+            >
+              Registreren
+            </button>
+          </div>
         </form>
 
         <div className="login-footer">

@@ -53,6 +53,7 @@ function Login() {
         <div className="login-header">
           <h1>EUsuite</h1>
           <p>Centraal inloggen voor alle EUsuite apps</p>
+          <div className="login-icon">🔐</div>
         </div>
 
         <form onSubmit={handleSubmit} className="login-form">
@@ -97,6 +98,7 @@ function Login() {
 
         <div className="login-footer">
           <p>© 2025 EUsuite Platform</p>
+          <p className="version">v1.0.0</p>
         </div>
       </div>
     </div>

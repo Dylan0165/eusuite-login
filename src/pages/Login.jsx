@@ -8,7 +8,7 @@ const DEFAULT_REDIRECT = 'http://192.168.124.50:30080'
 function Login() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -27,7 +27,7 @@ function Login() {
         },
         credentials: 'include', // BELANGRIJK: voor SSO cookie
         body: JSON.stringify({
-          username,
+          email,
           password,
         }),
       })
@@ -66,16 +66,16 @@ function Login() {
           )}
 
           <div className="form-group">
-            <label htmlFor="username">Gebruikersnaam</label>
+            <label htmlFor="email">E-mailadres</label>
             <input
-              type="text"
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
               disabled={loading}
-              autoComplete="username"
-              placeholder="Voer je gebruikersnaam in"
+              autoComplete="email"
+              placeholder="jouw@email.com"
             />
           </div>
 

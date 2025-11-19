@@ -16,6 +16,8 @@ function Register() {
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const handleChange = (e) => {
     setFormData({
@@ -34,8 +36,26 @@ function Register() {
       return
     }
 
-    if (formData.password.length < 6) {
-      setError('Wachtwoord moet minimaal 6 karakters zijn')
+    if (formData.password.length < 8) {
+      setError('Wachtwoord moet minimaal 8 karakters zijn')
+      return
+    }
+
+    // Check voor hoofdletter
+    if (!/[A-Z]/.test(formData.password)) {
+      setError('Wachtwoord moet minimaal 1 hoofdletter bevatten')
+      return
+    }
+
+    // Check voor speciaal teken
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password)) {
+      setError('Wachtwoord moet minimaal 1 speciaal teken bevatten (!@#$%^&*...)')
+      return
+    }
+
+    // Check voor cijfer
+    if (!/[0-9]/.test(formData.password)) {
+      setError('Wachtwoord moet minimaal 1 cijfer bevatten')
       return
     }
 
@@ -119,34 +139,62 @@ function Register() {
 
           <div className="form-group">
             <label htmlFor="password">Wachtwoord</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              disabled={loading}
-              autoComplete="new-password"
-              placeholder="Minimaal 6 karakters"
-              minLength={6}
-            />
+            <div className="password-input-wrapper">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                disabled={loading}
+                autoComplete="new-password"
+                placeholder="Min. 8 tekens, 1 hoofdletter, 1 cijfer, 1 speciaal teken"
+                minLength={8}
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+                disabled={loading}
+                aria-label={showPassword ? "Verberg wachtwoord" : "Toon wachtwoord"}
+              >
+                {showPassword ? '👁️' : '👁️‍🗨️'}
+              </button>
+            </div>
+            <div className="password-requirements">
+              <small>• Minimaal 8 karakters</small>
+              <small>• Minimaal 1 hoofdletter (A-Z)</small>
+              <small>• Minimaal 1 cijfer (0-9)</small>
+              <small>• Minimaal 1 speciaal teken (!@#$%...)</small>
+            </div>
           </div>
 
           <div className="form-group">
             <label htmlFor="confirmPassword">Bevestig wachtwoord</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-              disabled={loading}
-              autoComplete="new-password"
-              placeholder="Herhaal je wachtwoord"
-              minLength={6}
-            />
+            <div className="password-input-wrapper">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                id="confirmPassword"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                required
+                disabled={loading}
+                autoComplete="new-password"
+                placeholder="Herhaal je wachtwoord"
+                minLength={8}
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                disabled={loading}
+                aria-label={showConfirmPassword ? "Verberg wachtwoord" : "Toon wachtwoord"}
+              >
+                {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
+              </button>
+            </div>
           </div>
 
           <button type="submit" className="register-button" disabled={loading}>

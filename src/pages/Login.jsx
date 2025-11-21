@@ -3,7 +3,6 @@ import { useSearchParams, useNavigate } from 'react-router-dom'
 import './Login.css'
 
 const API_BASE_URL = 'http://192.168.124.50:30500/api/auth/login'
-const SSO_DOMAIN = 'http://192.168.124.50:30091'
 const DEFAULT_REDIRECT = '/dashboard'
 
 function Login() {
@@ -45,8 +44,15 @@ function Login() {
         throw new Error(data.detail || data.message || 'Login failed')
       }
 
-      // Login succesvol! Redirect naar de gevraagde app op SSO domein
-      window.location.href = `${SSO_DOMAIN}${redirectUrl}`
+      // Login succesvol! Redirect naar de gevraagde app
+      // Check of redirect een volledige URL is of een relatief pad
+      if (redirectUrl.startsWith('http://') || redirectUrl.startsWith('https://')) {
+        // Absolute URL - gebruik direct
+        window.location.href = redirectUrl
+      } else {
+        // Relatief pad - voeg window.location.origin toe
+        window.location.href = `${window.location.origin}${redirectUrl}`
+      }
 
     } catch (err) {
       setError(err.message || 'Er ging iets mis. Probeer opnieuw.')

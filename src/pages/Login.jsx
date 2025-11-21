@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import './Login.css'
 
-const API_URL = 'http://192.168.124.50:30500/api/auth/login'
-const DEFAULT_REDIRECT = 'http://192.168.124.50:30080'
+const API_BASE_URL = 'http://192.168.124.50:30500/api/auth/login'
+const SSO_DOMAIN = 'http://192.168.124.50:30091'
+const DEFAULT_REDIRECT = '/dashboard'
 
 function Login() {
   const [searchParams] = useSearchParams()
@@ -20,28 +21,32 @@ function Login() {
     setLoading(true)
 
     try {
-      const response = await fetch(API_URL, {
+      // Lees de redirect parameter uit de URL of gebruik default
+      const redirectUrl = searchParams.get('redirect') || DEFAULT_REDIRECT
+      
+      // Stuur POST request naar backend MET redirect query parameter
+      const apiUrl = `${API_BASE_URL}?redirect=${encodeURIComponent(redirectUrl)}`
+      
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include', // BELANGRIJK: voor SSO cookie
+        credentials: 'include', // BELANGRIJK: zorgt dat SSO-cookie wordt teruggestuurd
         body: JSON.stringify({
           email,
           password,
         }),
       })
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.detail || 'Login failed')
+      const data = await response.json()
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.detail || data.message || 'Login failed')
       }
 
-      // Login succesvol! Nu redirecten
-      const redirectUrl = searchParams.get('redirect') || DEFAULT_REDIRECT
-      
-      // Redirect naar de gevraagde app (of EuCloud als default)
-      window.location.href = redirectUrl
+      // Login succesvol! Redirect naar de gevraagde app op SSO domein
+      window.location.href = `${SSO_DOMAIN}${redirectUrl}`
 
     } catch (err) {
       setError(err.message || 'Er ging iets mis. Probeer opnieuw.')

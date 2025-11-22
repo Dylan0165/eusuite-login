@@ -5,6 +5,13 @@ import './Login.css'
 const API_BASE_URL = 'http://192.168.124.50:30500/api/auth/login'
 const DEFAULT_REDIRECT = '/dashboard'
 
+// Map voor app paths naar hun respectievelijke domeinen
+const APP_DOMAINS = {
+  '/eutype': 'http://192.168.124.50:30081',
+  '/eucloud': 'http://192.168.124.50:30080',
+  '/dashboard': 'http://192.168.124.50:30091',
+}
+
 function Login() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
@@ -50,8 +57,12 @@ function Login() {
         // Absolute URL - gebruik direct
         window.location.href = redirectUrl
       } else {
-        // Relatief pad - voeg window.location.origin toe
-        window.location.href = `${window.location.origin}${redirectUrl}`
+        // Relatief pad - zoek het juiste domein op basis van het pad
+        // Extract het basis pad (bvb /eutype/settings -> /eutype)
+        const basePath = '/' + redirectUrl.split('/').filter(Boolean)[0]
+        const targetDomain = APP_DOMAINS[basePath] || 'http://192.168.124.50:30091'
+        
+        window.location.href = `${targetDomain}${redirectUrl}`
       }
 
     } catch (err) {

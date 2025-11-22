@@ -5,11 +5,40 @@ import './Login.css'
 const API_BASE_URL = 'http://192.168.124.50:30500/api/auth/login'
 const DEFAULT_REDIRECT = '/dashboard'
 
-// Map voor app paths naar hun respectievelijke domeinen
-const APP_DOMAINS = {
-  '/eutype': 'http://192.168.124.50:30081',
-  '/eucloud': 'http://192.168.124.50:30080',
-  '/dashboard': 'http://192.168.124.50:30091',
+/**
+ * Normaliseer de redirect parameter naar een relative path
+ * @param {string} redirect - De redirect parameter uit de URL
+ * @returns {string} - Een genormaliseerde relative path
+ */
+function normalizeRedirect(redirect) {
+  if (!redirect || redirect.trim() === '') {
+    return DEFAULT_REDIRECT
+  }
+
+  // Als het een absolute URL is, haal alleen pathname + search op
+  if (redirect.startsWith('http://') || redirect.startsWith('https://')) {
+    try {
+      const url = new URL(redirect)
+      return url.pathname + url.search
+    } catch (e) {
+      return DEFAULT_REDIRECT
+    }
+  }
+
+  // Zorg dat het begint met /
+  return redirect.startsWith('/') ? redirect : `/${redirect}`
+}
+
+/**
+ * Bepaal het juiste app base domain op basis van de redirect path
+ * @param {string} redirect - Een genormaliseerde redirect path
+ * @returns {string} - Het base domain voor de app
+ */
+function getAppBaseFromRedirect(redirect) {
+  if (redirect.startsWith('/eutype')) return 'http://192.168.124.50:30081'
+  if (redirect.startsWith('/eucloud')) return 'http://192.168.124.50:30080'
+  if (redirect.startsWith('/dashboard')) return 'http://192.168.124.50:30091'
+  return 'http://192.168.124.50:30091' // default dashboard
 }
 
 function Login() {
@@ -27,11 +56,12 @@ function Login() {
     setLoading(true)
 
     try {
-      // Lees de redirect parameter uit de URL of gebruik default
-      const redirectUrl = searchParams.get('redirect') || DEFAULT_REDIRECT
+      // Lees en normaliseer de redirect parameter
+      const rawRedirect = searchParams.get('redirect')
+      const redirectPath = normalizeRedirect(rawRedirect)
       
       // Stuur POST request naar backend MET redirect query parameter
-      const apiUrl = `${API_BASE_URL}?redirect=${encodeURIComponent(redirectUrl)}`
+      const apiUrl = `${API_BASE_URL}?redirect=${encodeURIComponent(redirectPath)}`
       
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -51,19 +81,9 @@ function Login() {
         throw new Error(data.detail || data.message || 'Login failed')
       }
 
-      // Login succesvol! Redirect naar de gevraagde app
-      // Check of redirect een volledige URL is of een relatief pad
-      if (redirectUrl.startsWith('http://') || redirectUrl.startsWith('https://')) {
-        // Absolute URL - gebruik direct
-        window.location.href = redirectUrl
-      } else {
-        // Relatief pad - zoek het juiste domein op basis van het pad
-        // Extract het basis pad (bvb /eutype/settings -> /eutype)
-        const basePath = '/' + redirectUrl.split('/').filter(Boolean)[0]
-        const targetDomain = APP_DOMAINS[basePath] || 'http://192.168.124.50:30091'
-        
-        window.location.href = `${targetDomain}${redirectUrl}`
-      }
+      // Login succesvol! Bepaal het juiste app domain en redirect
+      const base = getAppBaseFromRedirect(redirectPath)
+      window.location.href = base + redirectPath
 
     } catch (err) {
       setError(err.message || 'Er ging iets mis. Probeer opnieuw.')
